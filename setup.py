@@ -8,3 +8,7 @@ version = "0.1.0"
 description = "YouTube Agentic RAG System"
 requires-python = ">=3.12"
 dependencies = []
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
