@@ -8,6 +8,9 @@ from pathlib import Path
 class Settings(BaseSettings):
     """系统核心配置"""
 
+    # 运行模式: development (本地) / production (云端)
+    RUN_MODE: str = "development"
+
     # API配置
     FIRECRAWL_API_KEY: str = ""
     FIRECRAWL_DEEP_RESEARCH_URL: str = "https://api.firecrawl.dev/v1/deep-search"

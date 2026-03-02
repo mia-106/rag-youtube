@@ -11,7 +11,21 @@ from dataclasses import dataclass
 from src.core.config import settings
 from src.vector_storage.superabase_client import SuperabaseClient
 from src.vector_storage.pgvector_handler import PGVectorHandler
-from src.retrieval.reranker import BGEReranker
+
+# 环境自适应：根据 RUN_MODE 决定使用本地模型还是 API
+USE_PRODUCTION_MODE = settings.RUN_MODE == "production"
+
+if USE_PRODUCTION_MODE:
+    # 生产模式：使用 Cohere Rerank API
+    try:
+        from langchain_cohere import CohereRerank
+        RERANKER_AVAILABLE = True
+    except ImportError:
+        RERANKER_AVAILABLE = False
+        logger.warning("Cohere not available, skipping reranker")
+else:
+    # 开发模式：使用本地 BGE Reranker
+    from src.retrieval.reranker import BGEReranker
 
 logger = logging.getLogger(__name__)
 
@@ -52,11 +66,23 @@ class HybridSearchEngine:
         await self.superabase_client.connect()
         await self.vector_handler.initialize()
 
-        # 初始化 Reranker (在线程中加载模型避免阻塞)
-        try:
-            self.reranker = await asyncio.to_thread(BGEReranker)
-        except Exception as e:
-            logger.warning(f"Reranker initialization failed: {e}")
+        # 初始化 Reranker (根据环境选择本地模型或 API)
+        if USE_PRODUCTION_MODE and RERANKER_AVAILABLE:
+            try:
+                logger.info("Using Cohere Rerank API")
+                self.reranker = CohereRerank(
+                    cohere_api_key=settings.COHERE_API_KEY,
+                    model=settings.COHERE_MODEL,
+                    top_n=settings.RERANK_TOP_K
+                )
+            except Exception as e:
+                logger.warning(f"Cohere Reranker initialization failed: {e}")
+        else:
+            # 开发模式：使用本地 BGE Reranker
+            try:
+                self.reranker = await asyncio.to_thread(BGEReranker)
+            except Exception as e:
+                logger.warning(f"Local Reranker initialization failed: {e}")
 
         logger.info("Hybrid search engine initialized successfully")
 

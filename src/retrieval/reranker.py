@@ -1,11 +1,26 @@
 import torch
 import logging
 import asyncio
-from typing import List, Tuple
-from transformers import AutoModelForSequenceClassification, AutoTokenizer
+from typing import List, Tuple, Optional
 from src.core.config import settings
 
 logger = logging.getLogger(__name__)
+
+# 环境自适应：根据 RUN_MODE 决定使用本地模型还是 API
+USE_PRODUCTION_MODE = settings.RUN_MODE == "production"
+
+if USE_PRODUCTION_MODE:
+    # 生产模式：使用 Cohere Rerank API
+    try:
+        from langchain_community.retrievers import ContextualCompressionRetriever
+        from langchain_cohere import CohereRerank
+        COHERE_AVAILABLE = True
+    except ImportError:
+        COHERE_AVAILABLE = False
+        logger.warning("Cohere not installed, falling back to local reranker")
+else:
+    # 开发模式：使用本地 BGE Reranker
+    from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
 
 class BGEReranker:
