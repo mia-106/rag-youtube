@@ -1,0 +1,156 @@
+# 🔒 环境配置文件
+.env
+.env.local
+.env.development
+.env.production
+.env.*.local
+
+# 🤖 AI/编辑器配置
+.claude/
+.cursorrules
+.trae/
+
+# 🤖 模型缓存
+hf_cache/
+
+# 🐳 Docker 数据
+docker_data/
+
+# 🐍 Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# 🏗️ PyInstaller
+*.manifest
+*.spec
+
+# 📦 pip
+Pipfile.lock
+
+# 🌐 conda
+.conda/
+environment.yml
+
+# 🔧 Virtual Environments
+.env/
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# 📊 Data files
+data/
+cache/
+logs/
+*.db
+*.sqlite
+*.sqlite3
+
+# 🧪 Testing
+.coverage
+.pytest_cache/
+.tox/
+.nox/
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# 📚 Documentation
+docs/_build/
+site/
+
+# 🚀 IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 🐳 Docker
+.dockerignore
+docker-compose.override.yml
+
+# 🔍 Vector Storage
+vector_storage/
+*.pkl
+*.h5
+*.hdf5
+
+# 🔑 Secrets and Keys
+secrets/
+keys/
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# 📈 Monitoring
+prometheus_data/
+grafana_data/
+
+# 🗃️ Database
+postgres_data/
+mysql_data/
+mongo_data/
+
+# 🗂️ Temporary Files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# 🧼 OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# 🤖 Model files
+models/
+checkpoints/
+*.model
+*.bin
+
+# 📦 Package files
+*.tar.gz
+*.zip
+*.rar
+
+# 🔄 CI/CD
+.github/
+.gitlab-ci.yml
+Jenkinsfile
+.travis.yml
+
+# 📝 Logs
+*.log
+logs/
+*.out

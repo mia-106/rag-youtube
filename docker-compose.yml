@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  # PostgreSQL + PGVector数据库
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: youtube-rag-postgres
+    environment:
+      POSTGRES_DB: youtube_rag
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./docker_data/postgres:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - youtube-rag-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis缓存 (可选)
+  redis:
+    image: redis:7-alpine
+    container_name: youtube-rag-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./docker_data/redis:/data
+    networks:
+      - youtube-rag-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # pgAdmin (数据库管理界面)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: youtube-rag-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@youtube-rag.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_LISTEN_PORT: 80
+    ports:
+      - "8080:80"
+    volumes:
+      - ./docker_data/pgadmin:/var/lib/pgadmin
+    networks:
+      - youtube-rag-network
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+networks:
+  youtube-rag-network:
+    driver: bridge
+
+# 使用说明:
+# 1. 运行: docker-compose up -d
+# 2. 访问PostgreSQL: localhost:5432 (用户: postgres, 密码: postgres)
+# 3. 访问pgAdmin: http://localhost:8080 (用户: admin@youtube-rag.com, 密码: admin123)
+# 4. 停止: docker-compose down
+# 5. 清理数据: docker-compose down -v
