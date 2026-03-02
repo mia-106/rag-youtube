@@ -4,7 +4,14 @@
 import asyncio
 import asyncpg
 import os
+import sys
 from pathlib import Path
+
+# Fix Unicode for Windows
+if sys.platform == 'win32':
+    import io
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
 # 本地 Docker 数据库配置
 LOCAL_DB_URL = "postgresql://postgres:postgres@localhost:5432/youtube_rag"
@@ -22,75 +29,19 @@ async def migrate_data():
         return
 
     print("=" * 50)
-    print("开始数据迁移: 本地 Docker -> Neon")
+    print("开始数据迁移: 本地文件 -> Neon")
     print("=" * 50)
 
-    # 连接两个数据库
-    print("\n[1/4] 连接本地数据库...")
-    local_conn = await asyncpg.connect(LOCAL_DB_URL)
-    print("✓ 本地数据库连接成功")
+    # 连接 Neon 数据库
+    print("\n[1/3] 连接 Neon 数据库...")
+    neon_conn = await asyncpg.connect(NEON_DB_URL, timeout=30)
+    print("[OK] Neon 数据库连接成功")
 
-    print("\n[2/4] 连接 Neon 数据库...")
-    neon_conn = await asyncpg.connect(NEON_DB_URL)
-    print("✓ Neon 数据库连接成功")
-
-    # 1. 迁移 channels 表
-    print("\n[3/4] 迁移 channels 表...")
-    channels = await local_conn.fetch("SELECT * FROM channels")
-    if channels:
-        for channel in channels:
-            await neon_conn.execute("""
-                INSERT INTO channels (id, channel_id, channel_name, description, subscriber_count, created_at, updated_at)
-                VALUES ($1, $2, $3, $4, $5, $6, $7)
-                ON CONFLICT (channel_id) DO NOTHING
-            """, channel['id'], channel['channel_id'], channel['channel_name'],
-                channel['description'], channel['subscriber_count'],
-                channel['created_at'], channel['updated_at'])
-        print(f"✓ 已迁移 {len(channels)} 个频道")
-    else:
-        print("  - channels 表为空，跳过")
-
-    # 2. 迁移 videos 表
-    print("\n迁移 videos 表...")
-    videos = await local_conn.fetch("SELECT * FROM videos")
-    if videos:
-        for video in videos:
-            await neon_conn.execute("""
-                INSERT INTO videos (id, video_id, channel_id, title, description, duration,
-                    view_count, like_count, published_at, content_hash, thumbnail_url, tags, created_at, updated_at)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
-                ON CONFLICT (video_id) DO NOTHING
-            """, video['id'], video['video_id'], video['channel_id'], video['title'],
-                video['description'], video['duration'], video['view_count'], video['like_count'],
-                video['published_at'], video['content_hash'], video['thumbnail_url'],
-                video['tags'], video['created_at'], video['updated_at'])
-        print(f"✓ 已迁移 {len(videos)} 个视频")
-    else:
-        print("  - videos 表为空，跳过")
-
-    # 3. 迁移 subtitle_chunks 表（核心！RAG 依赖这个）
-    print("\n迁移 subtitle_chunks 表...")
-    chunks = await local_conn.fetch("SELECT * FROM subtitle_chunks")
-    if chunks:
-        for chunk in chunks:
-            await neon_conn.execute("""
-                INSERT INTO subtitle_chunks (id, video_id, chunk_index, content, video_summary,
-                    start_time, end_time, metadata, embedding, content_hash, created_at)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-                ON CONFLICT (content_hash) DO NOTHING
-            """, chunk['id'], chunk['video_id'], chunk['chunk_index'], chunk['content'],
-                chunk['video_summary'], chunk['start_time'], chunk['end_time'],
-                chunk['metadata'], chunk['embedding'], chunk['content_hash'], chunk['created_at'])
-        print(f"✓ 已迁移 {len(chunks)} 个字幕块")
-    else:
-        print("  - subtitle_chunks 表为空")
-
-        # 如果数据库没有字幕块，尝试从本地文件导入
-        print("\n[4/4] 从字幕文件导入数据...")
-        await import_transcripts_from_files(neon_conn)
+    # 直接从字幕文件导入
+    print("\n[2/3] 从字幕文件导入数据...")
+    await import_transcripts_from_files(neon_conn)
 
     # 关闭连接
-    await local_conn.close()
     await neon_conn.close()
 
     print("\n" + "=" * 50)
@@ -152,9 +103,9 @@ async def import_transcripts_from_files(conn):
                 ON CONFLICT (content_hash) DO NOTHING
             """, video_id, idx, chunk_text, chunk_hash)
 
-        print(f"  ✓ {title}: {len(chunks)} 个块")
+        print(f"  [OK] {title}: {len(chunks)} 个块")
 
-    print(f"\n✓ 从 {len(files)} 个文件导入完成")
+    print(f"\n[OK] 从 {len(files)} 个文件导入完成")
 
 
 if __name__ == "__main__":
