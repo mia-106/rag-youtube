@@ -6,7 +6,7 @@ import "highlight.js/styles/github-dark.css";
 import { Send, Bot, Loader2, StopCircle, ThumbsUp, ThumbsDown, X, ImageIcon, ChevronDown, ChevronRight, Terminal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
+import { cn } from "../lib/utils";
 import { SourceCards } from "@/components/ui/source-cards";
 
 interface ChatInterfaceProps {

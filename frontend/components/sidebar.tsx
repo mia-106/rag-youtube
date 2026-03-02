@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn } from "../lib/utils";
 import { Bot, User, Settings, Youtube, Plus, MessageSquare, Clock, Trash2 } from "lucide-react";
 import { ConfirmationModal } from "./ui/confirmation-modal";
 
