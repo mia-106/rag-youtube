@@ -28,8 +28,12 @@ class Settings(BaseSettings):
 
     # 向量数据库配置
     OPENAI_API_KEY: Optional[str] = None
+
+    # Embedding 配置
     EMBEDDING_MODEL: str = "BAAI/bge-m3"
     EMBEDDING_DIMENSIONS: int = 1024
+    # 生产模式使用的 API Embedding
+    EMBEDDING_PROVIDER: str = "cohere"  # "cohere" or "openai"
 
     # 重排序配置
     RERANKER_MODEL: str = "BAAI/bge-reranker-v2-m3"
