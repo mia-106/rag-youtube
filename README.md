@@ -325,3 +325,4 @@ MIT License - see [LICENSE](LICENSE) for details.
 - [LangChain](https://github.com/langchain-ai/langchain) - AI Agent Framework
 - [BAAI](https://github.com/FlagOpen/FlagEmbedding) - BGE Embeddings
 - [DeepSeek](https://deepseek.com) - LLM Provider
+
