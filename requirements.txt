@@ -5,7 +5,7 @@ asyncpg>=0.31.0
 python-dotenv>=1.2.1
 pydantic>=2.12.5
 requests>=2.31.0
-sqlalchemy>=2.1.0
+sqlalchemy>=2.0.0
 pgvector>=0.2.0
 
 # AI/LangChain dependencies (needed for the agent)
