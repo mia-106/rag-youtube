@@ -62,10 +62,12 @@ async def shutdown_event():
     await supabase_client.disconnect()
 
 
-# Add CORS middleware to allow requests from Next.js (port 3000 usually)
+# Add CORS middleware to allow requests from Next.js (Vercel)
+# Get allowed origins from environment variable, default to localhost for dev
+allowed_origins = os.environ.get("CORS_ORIGINS", "http://localhost:3000").split(",")
 app_server.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Explicitly allow frontend origin
+    allow_origins=allowed_origins,  # Allow Vercel frontend
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
