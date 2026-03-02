@@ -27,7 +27,16 @@ print("DEBUG: Server script starting...", file=sys.stderr)
 # Add project root to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-app = importlib.import_module("src.agent.graph").app
+# Lazy load the graph app to avoid startup errors
+# app will be loaded on first request
+_app = None
+
+def get_app():
+    global _app
+    if _app is None:
+        _app = importlib.import_module("src.agent.graph").app
+    return _app
+
 print("DEBUG: Imported graph app.", file=sys.stderr)
 SuperabaseClient = importlib.import_module("src.vector_storage.superabase_client").SuperabaseClient
 
@@ -164,7 +173,7 @@ async def chat_endpoint(request: ChatRequest):
         try:
             logger.info("Starting event stream...")
             # Use astream_events to get granular events
-            async for event in app.astream_events(inputs, version="v1"):
+            async for event in get_app().astream_events(inputs, version="v1"):
                 kind = event["event"]
                 logger.debug(f"Event received: {kind}")
 
