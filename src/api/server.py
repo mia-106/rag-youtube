@@ -1,5 +1,11 @@
 import sys
 import io
+import os
+
+# Add project root to path
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
 
 # 强制设置标准输出为 UTF-8解决 Windows GBK 导致的问题
 if sys.platform == 'win32':
@@ -8,7 +14,6 @@ if sys.platform == 'win32':
 
 import importlib
 import logging
-import os
 from typing import List, Optional
 
 import uvicorn
